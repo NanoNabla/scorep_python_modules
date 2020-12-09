@@ -310,7 +310,9 @@ if sys.platform != 'win32':
         'spawn': SpawnContext(),
         'forkserver': ForkServerContext(),
     }
-    _default_context = DefaultContext(_concrete_contexts['fork'])
+
+    # TODO original the python developers use fork. if fork is also usable this should set back to fork
+    _default_context = DefaultContext(_concrete_contexts['spawn'])
 
 else:
 

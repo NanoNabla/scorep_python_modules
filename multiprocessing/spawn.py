@@ -13,6 +13,8 @@ import sys
 import runpy
 import types
 
+import uuid
+
 from . import get_start_method, set_start_method
 from . import process
 from .context import reduction
@@ -86,7 +88,18 @@ def get_command_line(**kwds):
         prog = 'from multiprocessing.spawn import spawn_main; spawn_main(%s)'
         prog %= ', '.join('%s=%r' % item for item in kwds.items())
         opts = util._args_from_interpreter_flags()
-        return [_python_exe] + opts + ['-c', prog, '--multiprocessing-fork']
+
+        scorep_opts = []
+        if os.environ.get("SCOREP_PYTHON_BINDINGS_INITIALISED") != "true":
+            # use scorep only if current process also uses scorep
+            # SCOREP_PYTHON_BINDINGS_INITIALISED is set by scorep-bindings-python
+            scorep_opts = ["-m scorep"]
+            scorep_exp_base = os.environ['SCOREP_EXPERIMENT_DIRECTORY'] if "SCOREP_EXPERIMENT_DIRECTORY" in os.environ else "scorep"
+            os.environ['SCOREP_EXPERIMENT_DIRECTORY'] = scorep_exp_base + "_" + uuid.uuid4().hex
+            del os.environ["SCOREP_PYTHON_BINDINGS_INITIALISED"]
+
+
+        return [_python_exe] + opts + scorep_opts + ['-c', prog, '--multiprocessing-fork']
 
 
 def spawn_main(pipe_handle, parent_pid=None, tracker_fd=None):
