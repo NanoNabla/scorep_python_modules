@@ -2,6 +2,8 @@ import os
 import sys
 import signal
 
+import uuid
+
 from . import util
 
 __all__ = ['Popen']
@@ -65,6 +67,14 @@ class Popen(object):
         self._send_signal(signal.SIGKILL)
 
     def _launch(self, process_obj):
+
+        if os.environ.get("SCOREP_PYTHON_BINDINGS_INITIALISED") == "true":
+            # use scorep only if current process also uses scorep
+            # SCOREP_PYTHON_BINDINGS_INITIALISED is set by scorep-bindings-python
+            scorep_exp_base = os.environ['SCOREP_EXPERIMENT_DIRECTORY'] if "SCOREP_EXPERIMENT_DIRECTORY" in os.environ else "scorep"
+            os.environ['SCOREP_EXPERIMENT_DIRECTORY'] = scorep_exp_base + "_" + uuid.uuid4().hex
+
+
         code = 1
         parent_r, child_w = os.pipe()
         self.pid = os.fork()
