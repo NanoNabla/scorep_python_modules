@@ -90,7 +90,7 @@ def get_command_line(**kwds):
         opts = util._args_from_interpreter_flags()
 
         scorep_opts = []
-        if os.environ.get("SCOREP_PYTHON_BINDINGS_INITIALISED") != "true":
+        if os.environ.get("SCOREP_PYTHON_BINDINGS_INITIALISED") == "true":
             # use scorep only if current process also uses scorep
             # SCOREP_PYTHON_BINDINGS_INITIALISED is set by scorep-bindings-python
             scorep_opts = ["-m scorep"]
